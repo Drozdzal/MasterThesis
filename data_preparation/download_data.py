@@ -1,5 +1,4 @@
 import yfinance as yf
-import pandas as pd
 from datetime import datetime
 
 from data_preparation.examle_tickers import MOCKED_TICKERS

@@ -1,6 +1,7 @@
 import datetime
 from abc import abstractmethod, ABC
 
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
@@ -16,7 +17,7 @@ class StockPredictor(ABC):
         self.test_model()
         self.visualize_predictions()
     def load_data(self):
-        self.df = pd.read_csv("test.csv", index_col=0)
+        self.df = pd.read_csv("test.csv", index_col=0).sort_index(axis=0, ascending=True)
         data = self.df["Close"].values.reshape(-1, 1)
         # Scale the data
         self.scaler = MinMaxScaler(feature_range=(0, 1))
@@ -40,14 +41,15 @@ class StockPredictor(ABC):
         self.predictions = self.model.predict(self.X_test)
         self.predictions = self.scaler.inverse_transform(self.predictions)
         self.y_pred = self.df[self.train_size:]["Close"]
-        self.y_pred['Predictions'] = self.predictions
+        flattened_x = [item for sublist in self.predictions for item in sublist]
+        self.y_pred['Predictions'] = pd.Series(np.asarray(flattened_x, float), index=self.y_pred.index)
 
     def load_model(self):
-        self.model = load_model("LSTMPredictor_20241014_202420_model.h5")
+        self.model = load_model("LSTMPredictor_20241016_222331_model.h5")
     def visualize_predictions(self):
         plt.figure(figsize=(14, 5))
         plt.plot(self.df[:self.train_size]['Close'], color="yellow",label='Training Data')
-        plt.plot(self.y_pred ,label='Actual Prices')
+        plt.plot(self.y_pred['Predictions'] ,label='Actual Prices')
         # plt.plot(self.predictions, color='red', label='Predicted Prices')
         plt.title('Stock Price Prediction')
         plt.xlabel('Days')

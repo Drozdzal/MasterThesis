@@ -35,8 +35,8 @@ class LSTMPredictor(StockPredictor):
         self.model.compile(optimizer='adam', loss='mean_squared_error')
 
     def train(self):
-        self.model.fit(self.X_train, self.Y_train, batch_size=64 ,epochs=10)
+        self.model.fit(self.X_train, self.Y_train, batch_size=64 ,epochs=50)
 
 predictor = LSTMPredictor()
-# predictor.generate_model()
-predictor.test_ready()
+predictor.generate_model()
+# predictor.test_ready()
