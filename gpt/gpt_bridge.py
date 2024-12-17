@@ -74,7 +74,7 @@ Provide the analysis in this JSON format:
 
 
 
-data = pd.read_csv("silver_df.csv")
+data = pd.read_csv("../data/sentiment_silver.csv")
 data["day"] = pd.to_datetime(data["day"])
 filter_date = pd.to_datetime('2024-06-01')
 data = data[data["day"]>filter_date]
@@ -87,4 +87,4 @@ for index, row in data.iterrows():
     gold_df = pd.concat([pd.DataFrame([[row["day"], row["url"], results.overall_sentiment, results.product_sentiment,results.quality_of_management,results.state_of_competition,results.upcoming_events,results.semiconductor_sector]],
                                         columns=gold_layer_columns), gold_df], ignore_index=True)
 
-gold_df.to_csv("gold_results.csv")
+gold_df.to_csv("sentiment_gold.csv")
