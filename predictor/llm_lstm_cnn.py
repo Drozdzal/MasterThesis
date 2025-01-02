@@ -1,9 +1,10 @@
-from common.config import NUMBER_OF_SENTIMENT_DATA
+
+from common.config import NUMBER_OF_SENTIMENT_DATA, NUMBER_OF_DAYS
 from predictor.training_model import TrainingModel
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, LSTM, Conv1D, MaxPooling1D, Flatten, Concatenate
 from tensorflow.keras.layers import Conv1D, MaxPooling1D, LSTM, Dense, Dropout, Flatten, BatchNormalization
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adadelta, Adam
 
 
 class LLMCnnLstmModel(TrainingModel):
@@ -37,7 +38,7 @@ class LLMCnnLstmModel(TrainingModel):
 
     @property
     def model_definition(self, hp = None):
-        inputs = Input(shape=(NUMBER_OF_SENTIMENT_DATA,1))
+        inputs = Input(shape=(NUMBER_OF_DAYS,NUMBER_OF_SENTIMENT_DATA))
 
         # CNN Layer - Feature extraction
         if hp is None:
@@ -95,6 +96,6 @@ class LLMCnnLstmModel(TrainingModel):
                     loss='mean_squared_error',
                     metrics=['mae'])
         else:
-            model.compile(optimizer=Adam(learning_rate=1e-3), loss='mse')
+            model.compile(optimizer=Adadelta(learning_rate=1.0), loss='mae')
 
         return model

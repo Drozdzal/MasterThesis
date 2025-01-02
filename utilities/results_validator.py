@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,17 +19,21 @@ class ResultsValidator:
         correct_direction = np.sum(np.sign(y_true[1:] - y_true[:-1]) == np.sign(y_pred[1:] - y_true[:-1]))
         direction_accuracy = (correct_direction / len(y_true[1:])) * 100
 
-        # Example metrics
-        metrics = {'mae': mae,
-                   'mse': mse,
-                   'r2': r2,
-                   "mape": mape,
-                   "direction_accuracy": direction_accuracy}
+        metrics = {'mae': [round(mae, 3)],
+                   'mse': [round(mse, 3)],
+                   'r2': [round(r2, 3)],
+                   "mape": [round(mape, 3)],
+                   "direction_accuracy": [round(direction_accuracy, 3)],
+                   "model":[self.model_name]}
 
         # Convert metrics to DataFrame
         df = pd.DataFrame(metrics)
-
-        df.to_csv('metrics.csv', mode='a', header=False, index=False)
+        if not os.path.exists(self.metrics_path):
+            # If the file doesn't exist, write the data with the header
+            df.to_csv(self.metrics_path, index=False)
+        else:
+            # If the file exists, append the data without the header
+            df.to_csv(self.metrics_path, mode='a', header=False, index=False)
 
     def plot_results_comparison(self, y_test, predictions):
         plt.figure(figsize=(12, 6))
@@ -38,9 +44,10 @@ class ResultsValidator:
         plt.ylabel("Price Movement")
         plt.legend()
         plt.grid()
+        plt.ylim(min(y_test) - 3, max(y_test) + 3)
         # plt.show()
         plt.savefig(f"{self.model_name}_short.png")
-    def plot_results_with_pre_predictions(self, y_test, predictions, pre_data):
+    def plot_results_with_pre_predictions(self, y_test, predictions, pre_data, file_end = "long"):
         plt.figure(figsize=(12, 6))
 
         plt.plot(pre_data, label='Pre-Prediction Data', color='green')
@@ -55,9 +62,10 @@ class ResultsValidator:
         plt.xlabel("Time")
         plt.ylabel("Price Movement")
         plt.legend()
+        plt.ylim(min(y_test) - 3, max(y_test) + 3)
         plt.grid()
         # plt.show()
-        plt.savefig(f"{self.model_name}_long.png")
+        plt.savefig(f"{self.model_name}_{file_end}.png")
 
     def save_results_to_csv(self, mae, mse, r2, mape, direction_accuracy, file_name):
         """

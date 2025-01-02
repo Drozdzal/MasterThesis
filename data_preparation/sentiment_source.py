@@ -6,7 +6,7 @@ from data_preparation.source_definition import SourceDefinition
 class SentimentSource(SourceDefinition):
     @property
     def table_path(self) -> str:
-        return f"../{DATA_PATH}/sentiment_gold.csv"
+        return f"../{DATA_PATH}/grouped_sentiment_final_gold.csv"
 
     @property
     def missing_behaviour(self) -> MissingBehaviour:

@@ -15,7 +15,7 @@ from data_preparation.stock_source import StockSource
 class DataCleaner:
     def __init__(self, sources: list[SourceDefinition], columns_to_drop: list[str] = None):
         self.sources = sources
-        self.cleaner_path = f"../{DATA_PATH}/final.csv"
+        self.cleaner_path = f"../{DATA_PATH}/final_3.csv"
         self.final_date_column = 'Date'
         self.final_df = pd.DataFrame(columns=[self.final_date_column])
         self.columns_to_drop = columns_to_drop
@@ -51,6 +51,6 @@ class DataCleaner:
 
 
 sources = [SentimentSource(), StockSource()]
-columns_to_drop = ["day","link"]
+columns_to_drop = ["day"]
 data_cleaner = DataCleaner(sources = sources, columns_to_drop = columns_to_drop)
-data_cleaner.merge_sources(date(year=2024,month=6,day=3))
+data_cleaner.merge_sources(date(year=2020,month=4,day=14))

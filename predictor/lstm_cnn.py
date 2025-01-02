@@ -1,9 +1,9 @@
-from common.config import NUMBER_OF_RAW_DATA
+from common.config import NUMBER_OF_RAW_DATA, NUMBER_OF_SENTIMENT_DATA, NUMBER_OF_DAYS
 from predictor.training_model import TrainingModel
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, LSTM, Conv1D, MaxPooling1D, Flatten, Concatenate
 from tensorflow.keras.layers import Conv1D, MaxPooling1D, LSTM, Dense, Dropout, Flatten, BatchNormalization
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adadelta, Adam
 
 
 class LstmCnnModel(TrainingModel):
@@ -37,7 +37,7 @@ class LstmCnnModel(TrainingModel):
 
     @property
     def model_definition(self, hp = None):
-        inputs = Input(shape=(NUMBER_OF_RAW_DATA,1))
+        inputs = Input(shape=(NUMBER_OF_DAYS,NUMBER_OF_RAW_DATA))
 
         if hp is None:
             x = Conv1D(filters=32, kernel_size=3, activation='relu')(inputs)  # Fixed filters and kernel size
@@ -83,6 +83,6 @@ class LstmCnnModel(TrainingModel):
                     loss='mean_squared_error',
                     metrics=['mae'])
         else:
-            model.compile(optimizer=Adam(learning_rate=1e-3), loss='mse')
+            model.compile(optimizer=Adadelta(learning_rate=1.0), loss='mae')
 
         return model

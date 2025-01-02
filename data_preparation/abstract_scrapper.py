@@ -13,8 +13,8 @@ class AbstractWebScrapper(ABC):
 
         self._run_id = f"{class_name}_{current_time}"
         os.mkdir(self._run_id)
-        self._bronze_path = f"./{self._run_id}/bronze_df.csv"
-        self._silver_path = f"./{self._run_id}/silver_df.csv"
+        self._bronze_path = f"./{self._run_id}/bronze_df_2.csv"
+        self._silver_path = f"./{self._run_id}/silver_df_2.csv"
 
 
     def scrap(self, start_page: int = 1, end_page: int = 10):

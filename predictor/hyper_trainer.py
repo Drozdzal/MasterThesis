@@ -1,19 +1,31 @@
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from common.config import NUMBER_OF_DAYS
+from predictor.lstm import hyper_model
 from predictor.training_model import TrainingModel
 import pandas as pd
 from tensorflow.keras.callbacks import EarlyStopping
-import numpy as np
+import keras_tuner as kt
+import tensorflow as tf
+from keras.src.callbacks import EarlyStopping
 
-class DataTrainer:
+
+class HyperTrainer:
     def __init__(self, model: TrainingModel, x: pd.DataFrame, y: pd.DataFrame):
-        self.model = model.model_definition
         self.model_name = model.model_name
         self.x = x
         self.y = y
         self.n_candles = NUMBER_OF_DAYS
+        self.tuner = kt.RandomSearch(
+            hyper_model,
+            objective='val_loss',  # Minimize the validation loss
+            max_trials=10,  # Number of different hyperparameter combinations to try
+            executions_per_trial=2,  # Number of models to train for each set of hyperparameters
+            directory='lstm_2_lstm',  # Directory to store the results
+            project_name='lstm_tuning'
+        )
 
     def standarize_data(self):
         self.x_standarizer = StandardScaler()
@@ -43,15 +55,16 @@ class DataTrainer:
 
     def train_model(self, epochs: int):
         # self.model.fit(self.x_train, self.y_train, validation_split=0.3, epochs=epochs, callbacks=[EarlyStopping(patience=250)])
-        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=epochs, validation_split = 0.2, callbacks=[EarlyStopping(patience=20)])
+        stop_early = EarlyStopping(monitor='val_loss', patience=10)
+        self.tuner.search(self.x_train, self.y_train, epochs=20, batch_size=32, validation_split=0.2,
+                     callbacks=[stop_early])
 
-    def predict(self):
-        self.y_pred = self.model.predict(self.x_test).flatten()
+        best_hps = self.tuner.get_best_hyperparameters(num_trials=1)[0]
+        print(best_hps)
 
-    def develop_model(self, epochs: int):
+    def develop_models(self, epochs: int):
         self.standarize_data()
         self.create_sequences()
         self.split_data()
         self.train_model(epochs)
-        self.predict()
-        return self.y_pred
+

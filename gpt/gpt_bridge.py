@@ -1,4 +1,5 @@
 import os
+import time
 
 import pandas as pd
 from openai import OpenAI
@@ -74,17 +75,19 @@ Provide the analysis in this JSON format:
 
 
 
-data = pd.read_csv("../data/sentiment_silver.csv")
-data["day"] = pd.to_datetime(data["day"])
-filter_date = pd.to_datetime('2024-06-01')
-data = data[data["day"]>filter_date]
+data = pd.read_csv("merged_silver_sentiment.csv")
+# data["day"] = pd.to_datetime(data["day"])
+# filter_date = pd.to_datetime('2024-06-01')
+# data = data[data["day"]>filter_date]
 gold_layer_columns = ["day","link","overall_sentiment","product_sentiment","quality_of_management","state_of_competition","upcoming_events","semiconductor_sector"]
 # ,day,url,title,content
 gold_df = pd.DataFrame(columns=gold_layer_columns)  # ["day","url","title","content"]
 for index, row in data.iterrows():
     text = row["content"]
     results = get_gpt_response(text)
+    print(results)
     gold_df = pd.concat([pd.DataFrame([[row["day"], row["url"], results.overall_sentiment, results.product_sentiment,results.quality_of_management,results.state_of_competition,results.upcoming_events,results.semiconductor_sector]],
                                         columns=gold_layer_columns), gold_df], ignore_index=True)
+    time.sleep(0.2)
 
 gold_df.to_csv("sentiment_gold.csv")
