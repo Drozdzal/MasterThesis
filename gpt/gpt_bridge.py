@@ -32,16 +32,16 @@ def get_gpt_response(message, model="gpt-4o-mini"):
             model=model,
             messages=[
                 {"role": "system", "content": f"""
-You are an assistant specialized in Intel stock analysis. Please use the same rating system for messages.
-Provide JSON analyses with the following format:
+                You are an assistant specialized in Intel stock analysis. Please use the same rating system for messages.
+                Provide JSON analyses with the following format:
 
-    "overall_sentiment": "It tells you the overall market attitude towards Intel's prices, whether market participants anticipate an increase or decline",
-    "product_sentiment": "Provides information about the status, problems and how good the products made by Intel are",
-    "quality_of_management": "Informs about the status and functioning of the management board, departures, layoffs and decisions of the management board",
-    "state_of_competition": "It informs about the state of competition on the market and how Intel positions itself on the market, whether it is a dominant player or whether it faces dangerous competition.",
-    "upcoming_events": "Sentiment regarding future events, whether upcoming events may cause prices to rise or fall."
-    "semiconductor_sector": "It determines what movements the market predicts for the semiconductor market, whether declines or increases are expected for the entire sector."
-    
+                "overall_sentiment": "It tells you the overall market attitude towards Intel's prices, whether market participants anticipate an increase or decline",
+                "product_sentiment": "Provides information about the status, problems and how good the products made by Intel are",
+                "quality_of_management": "Informs about the status and functioning of the management board, departures, layoffs and decisions of the management board",
+                "state_of_competition": "It informs about the state of competition on the market and how Intel positions itself on the market, whether it is a dominant player or whether it faces dangerous competition.",
+                "upcoming_events": "Sentiment regarding future events, whether upcoming events may cause prices to rise or fall."
+                "semiconductor_sector": "It determines what movements the market predicts for the semiconductor market, whether declines or increases are expected for the entire sector."
+                
 
 All values should be between -1 and 1 
 

@@ -1,9 +1,12 @@
+from keras.src.optimizers import RMSprop
+
 from common.config import NUMBER_OF_RAW_DATA, NUMBER_OF_SENTIMENT_DATA, NUMBER_OF_DAYS
 from predictor.training_model import TrainingModel
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Dense, LSTM, Conv1D, MaxPooling1D, Flatten, Concatenate
 from tensorflow.keras.layers import Conv1D, MaxPooling1D, LSTM, Dense, Dropout, Flatten, BatchNormalization
 from tensorflow.keras.optimizers import Adadelta, Adam
+from tensorflow.keras import layers, models
 
 
 class LstmCnnModel(TrainingModel):
@@ -35,54 +38,32 @@ class LstmCnnModel(TrainingModel):
     def model_name(self):
         return "LSTM_CNN"
 
-    @property
-    def model_definition(self, hp = None):
-        inputs = Input(shape=(NUMBER_OF_DAYS,NUMBER_OF_RAW_DATA))
+    def model_definition(self, conv_1: int = 64, conv_2: int = 128, conv_3: int = 64, lstm_1: int = 100,
+                         lstm_2: int = 100, number_of_days: int = NUMBER_OF_DAYS):
+        kernel_size = int(number_of_days/10)
+        model = models.Sequential()
+        model.add(layers.Conv1D(conv_1, kernel_size=kernel_size, activation='relu', padding='same',
+                                input_shape=(number_of_days, NUMBER_OF_RAW_DATA)))  # 30 time steps, 23 features
+        model.add(layers.MaxPooling1D(pool_size=2))  # MaxPooling to reduce dimensionality
 
-        if hp is None:
-            x = Conv1D(filters=32, kernel_size=3, activation='relu')(inputs)  # Fixed filters and kernel size
-            x = MaxPooling1D(pool_size=2)(x)
-            x = BatchNormalization()(x)
-            x = Conv1D(filters=32, kernel_size=3, activation='relu')(x)  # Fixed filters
-            x = MaxPooling1D(pool_size=2)(x)
-            x = BatchNormalization()(x)
-        else:
-            x = Conv1D(filters=hp.Int('cnn_filters', min_value=16, max_value=64, step=16),
-                       kernel_size=hp.Int('kernel_size', min_value=3, max_value=7, step=2),
-                       activation='relu')(inputs)
-            x = MaxPooling1D(pool_size=hp.Int('pool_size', min_value=2, max_value=4, step=1))(x)
-            x = BatchNormalization()(x)
+        model.add(layers.Conv1D(conv_2, kernel_size=kernel_size, activation='relu',
+                                padding='same'))  # Apply convolution on time steps (kernel size 3)
+        model.add(layers.MaxPooling1D(pool_size=2))  # MaxPooling to reduce dimensionality
 
-            x = Conv1D(filters=hp.Int('cnn_filters', min_value=16, max_value=64, step=16),
-                       kernel_size=hp.Int('kernel_size', min_value=3, max_value=7, step=2),
-                       activation='relu')(x)
-            x = MaxPooling1D(pool_size=hp.Int('pool_size', min_value=2, max_value=4, step=1))(x)
-            x = BatchNormalization()(x)
+        model.add(layers.Conv1D(conv_3, kernel_size=kernel_size, activation='relu', padding='same'))  # Another Conv1D layer
+        model.add(layers.MaxPooling1D(pool_size=2))  # MaxPooling to reduce dimensionality
 
-        if hp is None:
-            x = LSTM(64, return_sequences=False)(x)  # Fixed number of units
-        else:
-            x = LSTM(hp.Int('lstm_units', min_value=32, max_value=128, step=32), return_sequences=False)(x)
+        # Step 2: LSTM Layers
+        model.add(layers.Bidirectional(layers.LSTM(100, return_sequences=True)))  # First Bi-LSTM layer
+        model.add(layers.Dropout(0.5))  # Dropout for regularization
 
-        x = Dropout(0.2)(x)
+        model.add(layers.Bidirectional(layers.LSTM(100)))  # Second Bi-LSTM layer
+        model.add(layers.Dropout(0.5))  # Dropout for regularization
 
-        if hp is None:
-            x = Dense(32, activation='relu')(x)  # Fixed number of units
-        else:
-            x = Dense(hp.Int('dense_units', min_value=16, max_value=64, step=16), activation='relu')(x)
+        # Step 3: Dense Layer (for regression, or classification)
+        model.add(layers.Dense(1, activation='linear'))
 
-        x = Dropout(0.2)(x)
-
-        outputs = Dense(1, activation='linear')(x)
-
-        model = Model(inputs=inputs, outputs=outputs)
-
-        if hp:
-            model.compile(
-                    optimizer=Adam(learning_rate=hp.Float('learning_rate', min_value=1e-5, max_value=1e-2, sampling='log')),
-                    loss='mean_squared_error',
-                    metrics=['mae'])
-        else:
-            model.compile(optimizer=Adadelta(learning_rate=1.0), loss='mae')
+        # Compile the model with Adam optimizer and MSE loss (for regression tasks)
+        model.compile(RMSprop(learning_rate=0.001), loss="mse")
 
         return model

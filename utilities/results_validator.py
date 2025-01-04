@@ -34,8 +34,9 @@ class ResultsValidator:
         else:
             # If the file exists, append the data without the header
             df.to_csv(self.metrics_path, mode='a', header=False, index=False)
+        return metrics
 
-    def plot_results_comparison(self, y_test, predictions):
+    def plot_results_comparison(self, y_test, predictions, path = None):
         plt.figure(figsize=(12, 6))
         plt.plot(y_test, label='Actual Price Movement', color='blue')
         plt.plot(predictions, label='Predicted Price Movement', color='red')
@@ -46,8 +47,11 @@ class ResultsValidator:
         plt.grid()
         plt.ylim(min(y_test) - 3, max(y_test) + 3)
         # plt.show()
-        plt.savefig(f"{self.model_name}_short.png")
-    def plot_results_with_pre_predictions(self, y_test, predictions, pre_data, file_end = "long"):
+        if path is None:
+            plt.savefig(f"{self.model_name}.png")
+        else:
+            plt.savefig(f"{path}_short.png")
+    def plot_results_with_pre_predictions(self, y_test, predictions, pre_data, file_end = "long", path = None):
         plt.figure(figsize=(12, 6))
 
         plt.plot(pre_data, label='Pre-Prediction Data', color='green')
@@ -65,7 +69,10 @@ class ResultsValidator:
         plt.ylim(min(y_test) - 3, max(y_test) + 3)
         plt.grid()
         # plt.show()
-        plt.savefig(f"{self.model_name}_{file_end}.png")
+        if path is None:
+            plt.savefig(f"{self.model_name}_{file_end}.png")
+        else:
+            plt.savefig(f"{path}_{file_end}.png")
 
     def save_results_to_csv(self, mae, mse, r2, mape, direction_accuracy, file_name):
         """
