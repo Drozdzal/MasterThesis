@@ -86,7 +86,7 @@ if __name__ == "__main__":
     # #
     #
     lstm_cnn_model = LLMCnnLstmModel()
-    training = DataTrainer(lstm_cnn_model.model_definition, lstm_cnn_model.model_name, x, y)
+    training = DataTrainer(lstm_cnn_model.model_definition(), lstm_cnn_model.model_name, x, y)
     y_pred = training.develop_model(num_of_batches)
     y_test = training.y_test
     y_train = training.y_train

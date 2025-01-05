@@ -18,15 +18,15 @@ class LstmModel(TrainingModel):
         model = Sequential()
 
         # First LSTM layer
-        model.add(LSTM(lstm_1, activation='relu', return_sequences=True, input_shape=(number_of_days,NUMBER_OF_RAW_DATA)))
+        model.add(LSTM(16, activation='relu', return_sequences=True, input_shape=(30,17)))
         model.add(Dropout(0.2))
 
         # Second LSTM layer
-        model.add(LSTM(lstm_2, activation='relu', return_sequences=False))
+        model.add(LSTM(16, activation='relu', return_sequences=False))
         model.add(Dropout(0.2))
 
         # Fully connected layer for prediction
-        model.add(Dense(dense_1, activation='relu'))
+        model.add(Dense(16, activation='relu'))
         model.add(Dense(1))  # Output for price prediction
 
         model.compile(optimizer=RMSprop(learning_rate=0.001), loss='mse')

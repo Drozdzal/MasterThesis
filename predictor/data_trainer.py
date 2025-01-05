@@ -15,7 +15,7 @@ class DataTrainer:
         self.y = y
         self.n_candles = number_of_days
         self.x_train_nc, self.x_test_nc, self.y_train_nc, self.y_test_nc = train_test_split(
-            self.x, self.y, test_size=0.2, random_state=42,shuffle=False
+            self.x, self.y, test_size=0.1, random_state=42,shuffle=False
         )
 
     def standarize_data(self):
@@ -27,7 +27,7 @@ class DataTrainer:
 
     def split_data(self):
         x_train, x_test, y_train, y_test = train_test_split(
-            self.sequence_X, self.sequence_y, test_size=0.1, random_state=42
+            self.sequence_X, self.sequence_y, test_size=0.2, random_state=42, shuffle=False
         )
         self.x_train = x_train
         self.y_train = y_train
@@ -48,7 +48,7 @@ class DataTrainer:
 
     def train_model(self, epochs: int):
         # self.model.fit(self.x_train, self.y_train, validation_split=0.3, epochs=epochs, callbacks=[EarlyStopping(patience=250)])
-        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=epochs, validation_split = 0.2, callbacks=[EarlyStopping(patience=50)])
+        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=epochs, validation_split = 0.2, callbacks=[EarlyStopping(patience=150)])
 
     def predict(self):
         self.y_pred = self.model.predict(self.x_test)

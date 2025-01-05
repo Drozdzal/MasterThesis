@@ -35,7 +35,7 @@ class LLMCnnLstmModel(TrainingModel):
     def model_name(self):
         return "LLM_LSTM_CNN"
 
-    def model_definition(self, conv_1: int=64, conv_2: int = 128, conv_3: int=64, lstm_1: int=100, lstm_2: int =100, number_of_days: int = NUMBER_OF_DAYS ):
+    def model_definition(self, conv_1: int=32, conv_2: int = 32, conv_3: int=64, lstm_1: int=64, lstm_2: int =128, number_of_days: int = NUMBER_OF_DAYS ):
         # Define the model
         model = models.Sequential()
 
