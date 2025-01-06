@@ -38,7 +38,7 @@ class LstmCnnModel(TrainingModel):
     def model_name(self):
         return "LSTM_CNN"
 
-    def model_definition(self, conv_1: int = 64, conv_2: int = 128, conv_3: int = 64, lstm_1: int = 100,
+    def model_definition(self, conv_1: int = 64, conv_2: int = 128, conv_3: int = 32, lstm_1: int = 100,
                          lstm_2: int = 100, number_of_days: int = NUMBER_OF_DAYS):
         kernel_size = int(number_of_days/10)
         model = models.Sequential()

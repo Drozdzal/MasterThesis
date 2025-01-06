@@ -2,13 +2,14 @@ import yfinance as yf
 import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels.tsa.stattools import adfuller, grangercausalitytests
+import seaborn as sns
 
 stocks_to_test = ["AMD", "NVDA", "TSM", "MSFT", "AAPL", "GOOGL", "IBM", "TXN", "QCOM",
                   "AMZN", "MU", "ADBE", "META", "ORCL", "CSCO", "SPY"]
 
 def download_data():
     tickers = ["INTC", *stocks_to_test]
-    data = yf.download(tickers, start="2020-01-01", end="2023-01-01")['Close']
+    data = yf.download(tickers, start="2020-10-01", end="2024-10-01")['Close']
     return data.dropna(axis=1, how='all')  # Drop columns with all NaN values
 
 def make_stationary(data):
@@ -51,28 +52,25 @@ def plot_correlation_matrix(data, title="Correlation Matrix"):
     plt.figure(figsize=(10, 8))
     correlation_matrix = data.corr()
     plt.title(title)
-    plt.imshow(correlation_matrix, cmap='coolwarm', interpolation='nearest')
-    plt.colorbar()
-    plt.xticks(range(len(data.columns)), data.columns, rotation=90)
-    plt.yticks(range(len(data.columns)), data.columns)
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', vmin=-1, vmax=1, cbar=True)
+
     plt.show()
-    return correlation_matrix
 # Main process
 data = download_data()
 print("\nChecking stationarity of original data...")
 
-data_stationary = make_stationary(data)
-data_stationary.to_csv("dane_20.csv")
+# data_stationary = make_stationary(data)
+# data_stationary.to_csv("dane_20.csv")
 # Perform Granger causality test and sort results
 
 # data_stationary = pd.read_csv("dane_20.csv")
-p_values = granger_test_for_stocks(data_stationary)
-sorted_p_values = sorted(p_values.items(), key=lambda x: x[1])
-top_20_stocks = pd.DataFrame(sorted_p_values[:20], columns=['Stock', 'Min P-Value'])
+# p_values = granger_test_for_stocks(data_stationary)
+# sorted_p_values = sorted(p_values.items(), key=lambda x: x[1])
+# top_20_stocks = pd.DataFrame(sorted_p_values[:20], columns=['Stock', 'Min P-Value'])
 
-top_20_stocks.to_csv("rezultat_grangera.csv")
-# Display the results
-print("\nTop 20 stocks that may influence Intel's price the most based on Granger causality:")
-print(top_20_stocks)
+# top_20_stocks.to_csv("rezultat_grangera.csv")
+# # Display the results
+# print("\nTop 20 stocks that may influence Intel's price the most based on Granger causality:")
+# print(top_20_stocks)
 
-plot_correlation_matrix(data_stationary)
+plot_correlation_matrix(data)

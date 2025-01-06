@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from common.config import NUMBER_OF_DAYS
+from common.config import NUMBER_OF_DAYS, TEST_SIZE, VALIDATION_SIZE, SEED_ID
 from predictor.training_model import TrainingModel
 import pandas as pd
 from tensorflow.keras.callbacks import EarlyStopping
@@ -14,9 +14,7 @@ class DataTrainer:
         self.x = x
         self.y = y
         self.n_candles = number_of_days
-        self.x_train_nc, self.x_test_nc, self.y_train_nc, self.y_test_nc = train_test_split(
-            self.x, self.y, test_size=0.1, random_state=42,shuffle=False
-        )
+
 
     def standarize_data(self):
         self.x_standarizer = StandardScaler()
@@ -27,18 +25,20 @@ class DataTrainer:
 
     def split_data(self):
         x_train, x_test, y_train, y_test = train_test_split(
-            self.sequence_X, self.sequence_y, test_size=0.2, random_state=42, shuffle=False
+            self.sequence_X, self.sequence_y, test_size=TEST_SIZE, random_state=SEED_ID, shuffle=False
         )
         self.x_train = x_train
         self.y_train = y_train
         self.x_test = x_test
         self.y_test = y_test
         self.y_test_check = self.y_standarizer.inverse_transform(self.y_test)
+        self.x_train_nc = self.x_standarizer.inverse_transform(x_train[:,-1,:])
+        self.x_test_nc = self.x_standarizer.inverse_transform(x_test[:,-1,:])
 
     def create_sequences(self):
         self.sequence_X = []
         self.sequence_y = []
-
+        starting_id = self.n_candles
         for i in range(self.n_candles, len(self.x)):
             self.sequence_X.append(self.scaled_x[i - self.n_candles:i])
             self.sequence_y.append(self.scaled_y[i])
@@ -48,7 +48,7 @@ class DataTrainer:
 
     def train_model(self, epochs: int):
         # self.model.fit(self.x_train, self.y_train, validation_split=0.3, epochs=epochs, callbacks=[EarlyStopping(patience=250)])
-        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=epochs, validation_split = 0.2, callbacks=[EarlyStopping(patience=150)])
+        self.model.fit(self.x_train, self.y_train, batch_size=32, epochs=epochs, validation_split = VALIDATION_SIZE, callbacks=[EarlyStopping(patience=50)])
 
     def predict(self):
         self.y_pred = self.model.predict(self.x_test)

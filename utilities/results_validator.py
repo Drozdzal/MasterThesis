@@ -12,6 +12,8 @@ class ResultsValidator:
         self.metrics_path = "metrics.csv"
 
     def calculate_metrics(self, y_true, y_pred):
+        y_true = np.array(y_true)
+        y_pred = np.array(y_pred)
         mae = mean_absolute_error(y_true, y_pred)
         mse = mean_squared_error(y_true, y_pred)
         r2 = r2_score(y_true, y_pred)
@@ -45,7 +47,10 @@ class ResultsValidator:
         plt.ylabel("Price Movement")
         plt.legend()
         plt.grid()
-        plt.ylim(min(y_test) - 3, max(y_test) + 3)
+        plt.xticks(rotation=30)
+        plt.xticks(np.arange(0, len(y_test), step=6), labels=y_test.index[::6])
+        plt.gca().tick_params(axis='x', pad=4)  # Decrease the padding value (default is usually around 6)
+        plt.ylim(min(y_test["price_movements"]) - 3, max(y_test["price_movements"]) + 3)
         # plt.show()
         if path is None:
             plt.savefig(f"{self.model_name}.png")
@@ -56,17 +61,21 @@ class ResultsValidator:
 
         plt.plot(pre_data, label='Pre-Prediction Data', color='green')
 
-        plt.plot(np.arange(len(pre_data), len(pre_data) + len(y_test)), y_test, label='Actual Price Movement',
+        plt.plot(y_test, label='Actual Closing Price',
                  color='blue')
 
-        plt.plot(np.arange(len(pre_data), len(pre_data) + len(predictions)), predictions,
-                 label='Predicted Price Movement', color='red')
+        plt.plot(predictions,
+                 label='Predicted Closing Price', color='red')
 
-        plt.title(f"Price Movement Comparison (With Pre-Prediction Data): {self.model_name}")
+        plt.title(f"Closing Intel price: {self.model_name}")
+        plt.xticks(rotation=30)
+        plt.xticks(np.arange(0, len(pre_data)+len(y_test), step=25), labels=pre_data.index[::25].union(y_test.index[::25]))
+        plt.gca().tick_params(axis='x', pad=4)  # Decrease the padding value (default is usually around 6)
+
         plt.xlabel("Time")
-        plt.ylabel("Price Movement")
+        plt.ylabel("Closing Price")
         plt.legend()
-        plt.ylim(min(y_test) - 3, max(y_test) + 3)
+        plt.ylim(np.min(np.concatenate((y_test, predictions,pre_data)))- 3, np.max(np.concatenate((y_test, predictions,pre_data)))+3)
         plt.grid()
         # plt.show()
         if path is None:

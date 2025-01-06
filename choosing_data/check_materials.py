@@ -3,13 +3,14 @@ import pandas as pd
 import numpy as np
 from statsmodels.tsa.stattools import adfuller, grangercausalitytests
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Define assets to analyze: Intel and selected commodities
 assets_to_test = ["INTC", "GLD", "SLV", "COPX", "PALL"]  # GLD=Gold, SLV=Silver, COPX=Copper, PALL=Palladium, WOOD=Lumber
 
 # Download data
 def download_data():
-    data = yf.download(assets_to_test, start="2020-01-01", end="2023-01-01")['Close']
+    data = yf.download(assets_to_test, start="2020-10-01", end="2024-10-01")['Close']
     return data.dropna()
 
 # Make data stationary
@@ -32,12 +33,11 @@ def plot_correlation_matrix(data, title="Correlation Matrix"):
     correlation_matrix = data.corr()
     plt.figure(figsize=(10, 8))
     plt.title("Korelacja INTC oraz surowcow")
-    heatmap = plt.imshow(correlation_matrix, cmap='coolwarm', interpolation='nearest')
-    plt.colorbar(heatmap)
-    plt.xticks(range(len(data.columns)), data.columns, rotation=90)
-    plt.yticks(range(len(data.columns)), data.columns)
+    sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', vmin=-1, vmax=1, cbar=True)
+    # plt.xticks(range(len(data.columns)), data.columns, rotation=90)
+    # plt.yticks(range(len(data.columns)), data.columns)
     plt.show()
-    return correlation_matrix
+    # return correlation_matrix
 
 # Perform Granger causality tests to see if each asset affects Intel's future prices
 def granger_test_for_assets(data, target='INTC', max_lag=10):

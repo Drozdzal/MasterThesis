@@ -1,4 +1,4 @@
-from keras.src.optimizers import RMSprop
+from keras.src.optimizers import RMSprop, Adadelta
 
 from common.config import NUMBER_OF_SENTIMENT_DATA, NUMBER_OF_DAYS
 from predictor.training_model import TrainingModel
@@ -35,7 +35,7 @@ class LLMCnnLstmModel(TrainingModel):
     def model_name(self):
         return "LLM_LSTM_CNN"
 
-    def model_definition(self, conv_1: int=32, conv_2: int = 32, conv_3: int=64, lstm_1: int=64, lstm_2: int =128, number_of_days: int = NUMBER_OF_DAYS ):
+    def model_definition(self, conv_1: int=64, conv_2: int = 64, conv_3: int=128, lstm_1: int=64, lstm_2: int =32, number_of_days: int = NUMBER_OF_DAYS ):
         # Define the model
         model = models.Sequential()
 
@@ -52,16 +52,19 @@ class LLMCnnLstmModel(TrainingModel):
         model.add(layers.MaxPooling1D(pool_size=2))  # MaxPooling to reduce dimensionality
 
         # Step 2: LSTM Layers
-        model.add(layers.Bidirectional(layers.LSTM(100, return_sequences=True)))  # First Bi-LSTM layer
-        model.add(layers.Dropout(0.5))  # Dropout for regularization
+        model.add(layers.LSTM(lstm_1, return_sequences=True))  # First Bi-LSTM layer
+        model.add(layers.Dropout(0.2))  # Dropout for regularization
 
-        model.add(layers.Bidirectional(layers.LSTM(100)))  # Second Bi-LSTM layer
-        model.add(layers.Dropout(0.5))  # Dropout for regularization
-
+        model.add(layers.LSTM(lstm_2,return_sequences=True))
+        model.add(layers.Dropout(0.2))  # Dropout for regularization
+        model.add(layers.LSTM(lstm_2,return_sequences=True))
+        model.add(layers.Dropout(0.2))
+        model.add(layers.LSTM(lstm_2))
+        model.add(layers.Dropout(0.2))
         # Step 3: Dense Layer (for regression, or classification)
-        model.add(layers.Dense(1, activation='linear'))
+        model.add(layers.Dense(1))
 
         # Compile the model with Adam optimizer and MSE loss (for regression tasks)
-        model.compile(RMSprop(learning_rate=0.001), loss="mse")
+        model.compile(optimizer=RMSprop(learning_rate=0.001), loss="mse")
 
         return model
